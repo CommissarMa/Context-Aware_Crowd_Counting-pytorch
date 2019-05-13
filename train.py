@@ -5,6 +5,7 @@ import torch.nn as nn
 import os
 import visdom
 import random
+from tqdm import tqdm as tqdm
 
 from csrnet import CSRNet
 from my_dataset import CrowdDataset
@@ -19,7 +20,7 @@ if __name__=="__main__":
     lr                = 1e-7
     batch_size        = 1
     momentum          = 0.95
-    epochs            = 400
+    epochs            = 2000
     steps             = [-1,1,100,150]
     scales            = [1,1,1,1]
     workers           = 4
@@ -34,6 +35,7 @@ if __name__=="__main__":
     optimizer=torch.optim.SGD(model.parameters(),lr,
                               momentum=momentum,
                               weight_decay=0)
+#    optimizer=torch.optim.Adam(model.parameters(),lr)
     train_dataset=CrowdDataset(train_image_root,train_dmap_root,gt_downsample=8)
     train_loader=torch.utils.data.DataLoader(train_dataset,batch_size=1,shuffle=True)
     test_dataset=CrowdDataset(test_image_root,test_dmap_root,gt_downsample=8)
@@ -50,7 +52,7 @@ if __name__=="__main__":
         # training phase
         model.train()
         epoch_loss=0
-        for i,(img,gt_dmap) in enumerate(train_loader):
+        for i,(img,gt_dmap) in enumerate(tqdm(train_loader)):
             img=img.to(device)
             gt_dmap=gt_dmap.to(device)
             # forward propagation
@@ -69,7 +71,7 @@ if __name__=="__main__":
         # testing phase
         model.eval()
         mae=0
-        for i,(img,gt_dmap) in enumerate(test_loader):
+        for i,(img,gt_dmap) in enumerate(tqdm(test_loader)):
             img=img.to(device)
             gt_dmap=gt_dmap.to(device)
             # forward propagation

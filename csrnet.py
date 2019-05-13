@@ -5,13 +5,21 @@ import collections
 
 
 class CSRNet(nn.Module):
-    def __init__(self, load_weights=True):
+    def __init__(self, load_weights=False):
         super(CSRNet,self).__init__()
         self.frontend_feat=[64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512]
         self.backend_feat=[512, 512, 512,256,128,64]
         self.frontend = make_layers(self.frontend_feat)
         self.backend = make_layers(self.backend_feat,in_channels = 512,dilation = True)
         self.output_layer = nn.Conv2d(64, 1, kernel_size=1)
+        self.conv1_1=nn.Conv2d(512,512,kernel_size=1)
+        self.conv1_2=nn.Conv2d(512,512,kernel_size=1)
+        self.conv2_1=nn.Conv2d(512,512,kernel_size=1)
+        self.conv2_2=nn.Conv2d(512,512,kernel_size=1)
+        self.conv3_1=nn.Conv2d(512,512,kernel_size=1)
+        self.conv3_2=nn.Conv2d(512,512,kernel_size=1)
+        self.conv6_1=nn.Conv2d(512,512,kernel_size=1)
+        self.conv6_2=nn.Conv2d(512,512,kernel_size=1)
         if not load_weights:
             mod = models.vgg16(pretrained = True)
             self._initialize_weights()
@@ -27,34 +35,47 @@ class CSRNet(nn.Module):
         fv = self.frontend(x)
         #S=1
         ave1=nn.functional.adaptive_avg_pool2d(fv,(1,1))
-        ave1=nn.functional.conv2d(ave1,torch.randn(512,512,1,1))
+        ave1=self.conv1_1(ave1)
+#        ave1=nn.functional.relu(ave1)
         s1=nn.functional.upsample(ave1,size=(fv.shape[2],fv.shape[3]),mode='bilinear')
         c1=s1-fv
-        w1=nn.functional.conv2d(c1,torch.randn(512,512,1,1))
+        w1=self.conv1_2(c1)
         w1=nn.functional.sigmoid(w1)
         #S=2
         ave2=nn.functional.adaptive_avg_pool2d(fv,(2,2))
-        ave2=nn.functional.conv2d(ave2,torch.randn(512,512,1,1))
+        ave2=self.conv2_1(ave2)
+#        ave2=nn.functional.relu(ave2)
         s2=nn.functional.upsample(ave2,size=(fv.shape[2],fv.shape[3]),mode='bilinear')
         c2=s2-fv
-        w2=nn.functional.conv2d(c2,torch.randn(512,512,1,1))
+        w2=self.conv2_2(c2)
         w2=nn.functional.sigmoid(w2)
         #S=3
         ave3=nn.functional.adaptive_avg_pool2d(fv,(3,3))
-        ave3=nn.functional.conv2d(ave3,torch.randn(512,512,1,1))
+        ave3=self.conv3_1(ave3)
+#        ave3=nn.functional.relu(ave3)
         s3=nn.functional.upsample(ave3,size=(fv.shape[2],fv.shape[3]),mode='bilinear')
         c3=s3-fv
-        w3=nn.functional.conv2d(c3,torch.randn(512,512,1,1))
+        w3=self.conv3_2(c3)
         w3=nn.functional.sigmoid(w3)
         #S=6
+#        print('fv',fv.mean())
         ave6=nn.functional.adaptive_avg_pool2d(fv,(6,6))
-        ave6=nn.functional.conv2d(ave6,torch.randn(512,512,1,1))
+#        print('ave6',ave6.mean())
+        ave6=self.conv6_1(ave6)
+#        print(ave6.mean())
+#        ave6=nn.functional.relu(ave6)
         s6=nn.functional.upsample(ave6,size=(fv.shape[2],fv.shape[3]),mode='bilinear')
+#        print('s6',s6.mean(),'s1',s1.mean(),'s2',s2.mean(),'s3',s3.mean())
         c6=s6-fv
-        w6=nn.functional.conv2d(c6,torch.randn(512,512,1,1))
+#        print('c6',c6.mean())
+        w6=self.conv6_2(c6)
         w6=nn.functional.sigmoid(w6)
+#        print('w6',w6.mean())
         
-        fi=(w1*s1+w2*s2+w3*s3+w6*s6)/(w1+w2+w3+w6)+fv
+        fi=0.5*((w1*s1+w2*s2+w3*s3+w6*s6)/(w1+w2+w3+w6+0.00001)+fv)
+#        print('fi',fi.mean())
+#        fi=fv
+        
         x = self.backend(fi)
         x = self.output_layer(x)
         return x
@@ -90,7 +111,7 @@ def make_layers(cfg, in_channels = 3,batch_norm=False,dilation = False):
 
 # testing
 if __name__=="__main__":
-    csrnet=CSRNet()
-    input_img=torch.ones((1,3,256,256))
+    csrnet=CSRNet().to('cuda')
+    input_img=torch.ones((1,3,256,256)).to('cuda')
     out=csrnet(input_img)
-    print(out.shape)
+    print(out.mean())
