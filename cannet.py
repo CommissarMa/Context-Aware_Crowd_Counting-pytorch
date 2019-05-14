@@ -4,9 +4,9 @@ from torchvision import models
 import collections
 
 
-class CSRNet(nn.Module):
+class CANNet(nn.Module):
     def __init__(self, load_weights=False):
-        super(CSRNet,self).__init__()
+        super(CANNet,self).__init__()
         self.frontend_feat=[64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512]
         self.backend_feat=[512, 512, 512,256,128,64]
         self.frontend = make_layers(self.frontend_feat)
@@ -111,7 +111,7 @@ def make_layers(cfg, in_channels = 3,batch_norm=False,dilation = False):
 
 # testing
 if __name__=="__main__":
-    csrnet=CSRNet().to('cuda')
+    csrnet=CANNet().to('cuda')
     input_img=torch.ones((1,3,256,256)).to('cuda')
     out=csrnet(input_img)
     print(out.mean())

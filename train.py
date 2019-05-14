@@ -7,7 +7,7 @@ import visdom
 import random
 from tqdm import tqdm as tqdm
 
-from csrnet import CSRNet
+from cannet import CANNet
 from my_dataset import CrowdDataset
 
 if __name__=="__main__":
@@ -30,7 +30,7 @@ if __name__=="__main__":
     vis=visdom.Visdom()
     device=torch.device(gpu_or_cpu)
     torch.cuda.manual_seed(seed)
-    model=CSRNet().to(device)
+    model=CANNet().to(device)
     criterion=nn.MSELoss(size_average=False).to(device)
     optimizer=torch.optim.SGD(model.parameters(),lr,
                               momentum=momentum,
