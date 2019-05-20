@@ -25,13 +25,13 @@ if __name__=="__main__":
     scales            = [1,1,1,1]
     workers           = 4
     seed              = time.time()
-    print_freq        = 30
+    print_freq        = 30 
     
     vis=visdom.Visdom()
     device=torch.device(gpu_or_cpu)
     torch.cuda.manual_seed(seed)
     model=CANNet().to(device)
-    criterion=nn.L1Loss(size_average=False).to(device)
+    criterion=nn.MSELoss(size_average=False).to(device)
     optimizer=torch.optim.SGD(model.parameters(),lr,
                               momentum=momentum,
                               weight_decay=0)
