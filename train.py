@@ -20,7 +20,7 @@ if __name__=="__main__":
     lr                = 1e-7
     batch_size        = 1
     momentum          = 0.95
-    epochs            = 2000
+    epochs            = 20000
     steps             = [-1,1,100,150]
     scales            = [1,1,1,1]
     workers           = 4
@@ -31,7 +31,7 @@ if __name__=="__main__":
     device=torch.device(gpu_or_cpu)
     torch.cuda.manual_seed(seed)
     model=CANNet().to(device)
-    criterion=nn.MSELoss(size_average=False).to(device)
+    criterion=nn.L1Loss(size_average=False).to(device)
     optimizer=torch.optim.SGD(model.parameters(),lr,
                               momentum=momentum,
                               weight_decay=0)

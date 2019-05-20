@@ -10,16 +10,16 @@ class CANNet(nn.Module):
         self.frontend_feat=[64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512]
         self.backend_feat=[512, 512, 512,256,128,64]
         self.frontend = make_layers(self.frontend_feat)
-        self.backend = make_layers(self.backend_feat,in_channels = 512,dilation = True)
+        self.backend = make_layers(self.backend_feat,in_channels = 1024,dilation = True)
         self.output_layer = nn.Conv2d(64, 1, kernel_size=1)
-        self.conv1_1=nn.Conv2d(512,512,kernel_size=1)
-        self.conv1_2=nn.Conv2d(512,512,kernel_size=1)
-        self.conv2_1=nn.Conv2d(512,512,kernel_size=1)
-        self.conv2_2=nn.Conv2d(512,512,kernel_size=1)
-        self.conv3_1=nn.Conv2d(512,512,kernel_size=1)
-        self.conv3_2=nn.Conv2d(512,512,kernel_size=1)
-        self.conv6_1=nn.Conv2d(512,512,kernel_size=1)
-        self.conv6_2=nn.Conv2d(512,512,kernel_size=1)
+        self.conv1_1=nn.Conv2d(512,512,kernel_size=1,bias=False)
+        self.conv1_2=nn.Conv2d(512,512,kernel_size=1,bias=False)
+        self.conv2_1=nn.Conv2d(512,512,kernel_size=1,bias=False)
+        self.conv2_2=nn.Conv2d(512,512,kernel_size=1,bias=False)
+        self.conv3_1=nn.Conv2d(512,512,kernel_size=1,bias=False)
+        self.conv3_2=nn.Conv2d(512,512,kernel_size=1,bias=False)
+        self.conv6_1=nn.Conv2d(512,512,kernel_size=1,bias=False)
+        self.conv6_2=nn.Conv2d(512,512,kernel_size=1,bias=False)
         if not load_weights:
             mod = models.vgg16(pretrained = True)
             self._initialize_weights()
@@ -72,11 +72,12 @@ class CANNet(nn.Module):
         w6=nn.functional.sigmoid(w6)
 #        print('w6',w6.mean())
         
-        fi=0.5*((w1*s1+w2*s2+w3*s3+w6*s6)/(w1+w2+w3+w6+0.00001)+fv)
+        fi=(w1*s1+w2*s2+w3*s3+w6*s6)/(w1+w2+w3+w6+0.000000000001)
 #        print('fi',fi.mean())
 #        fi=fv
+        x=torch.cat((fv,fi),1)
         
-        x = self.backend(fi)
+        x = self.backend(x)
         x = self.output_layer(x)
         return x
     def _initialize_weights(self):

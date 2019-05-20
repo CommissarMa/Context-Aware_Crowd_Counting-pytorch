@@ -26,4 +26,4 @@ Dropbox: [link](https://www.dropbox.com/s/fipgjqxl7uj8hd5/ShanghaiTech.zip?dl=0)
 &emsp;1. Modify the root path in "test.py" according to your dataset position.  
 &emsp;2. Run test.py for calculate MAE of test images or just show an estimated density-map.  
 # Other notes
-we got MSE=69.02 at the 797 epoch which is worse than the result in paper. Can anyone get the result in paper, please inform me. Thank you!
+we got MAE=62.3 at the 353 epoch which is reported in paper. Thank you for the author's response by email.

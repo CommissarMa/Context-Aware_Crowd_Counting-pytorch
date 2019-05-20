@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import cv2
 from torchvision import transforms
+import random
 
 
 class CrowdDataset(Dataset):
@@ -32,11 +33,17 @@ class CrowdDataset(Dataset):
         assert index <= len(self), 'index range error'
         img_name=self.img_names[index]
         img=plt.imread(os.path.join(self.img_root,img_name))/255# convert from [0,255] to [0,1]
+        
         if len(img.shape)==2: # expand grayscale image to three channel.
             img=img[:,:,np.newaxis]
             img=np.concatenate((img,img,img),2)
 
         gt_dmap=np.load(os.path.join(self.gt_dmap_root,img_name.replace('.jpg','.npy')))
+        
+        if random.randint(0,1)==1:
+            img=img[:,::-1]#水平翻转
+            gt_dmap=gt_dmap[:,::-1]#水平翻转
+        
         if self.gt_downsample>1: # to downsample image and density-map to match deep-model.
             ds_rows=int(img.shape[0]//self.gt_downsample)
             ds_cols=int(img.shape[1]//self.gt_downsample)
