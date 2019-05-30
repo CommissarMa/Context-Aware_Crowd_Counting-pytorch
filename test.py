@@ -18,7 +18,7 @@ def cal_mae(img_root,gt_dmap_root,model_param_path):
     model=CANNet()
     model.load_state_dict(torch.load(model_param_path))
     model.to(device)
-    dataset=CrowdDataset(img_root,gt_dmap_root,8)
+    dataset=CrowdDataset(img_root,gt_dmap_root,8,,phase='test')
     dataloader=torch.utils.data.DataLoader(dataset,batch_size=1,shuffle=False)
     model.eval()
     mae=0
@@ -44,7 +44,7 @@ def estimate_density_map(img_root,gt_dmap_root,model_param_path,index):
     device=torch.device("cuda")
     model=CANNet().to(device)
     model.load_state_dict(torch.load(model_param_path))
-    dataset=CrowdDataset(img_root,gt_dmap_root,8)
+    dataset=CrowdDataset(img_root,gt_dmap_root,8,,phase='test')
     dataloader=torch.utils.data.DataLoader(dataset,batch_size=1,shuffle=False)
     model.eval()
     for i,(img,gt_dmap) in enumerate(dataloader):

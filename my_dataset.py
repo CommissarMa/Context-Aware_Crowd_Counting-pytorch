@@ -12,15 +12,17 @@ class CrowdDataset(Dataset):
     '''
     crowdDataset
     '''
-    def __init__(self,img_root,gt_dmap_root,gt_downsample=1):
+    def __init__(self,img_root,gt_dmap_root,gt_downsample=1,phase='train'):
         '''
         img_root: the root path of img.
         gt_dmap_root: the root path of ground-truth density-map.
         gt_downsample: default is 0, denote that the output of deep-model is the same size as input image.
+        phase: train or test
         '''
         self.img_root=img_root
         self.gt_dmap_root=gt_dmap_root
         self.gt_downsample=gt_downsample
+        self.phase=phase
 
         self.img_names=[filename for filename in os.listdir(img_root) \
                            if os.path.isfile(os.path.join(img_root,filename))]
@@ -40,7 +42,7 @@ class CrowdDataset(Dataset):
 
         gt_dmap=np.load(os.path.join(self.gt_dmap_root,img_name.replace('.jpg','.npy')))
         
-        if random.randint(0,1)==1:
+        if random.randint(0,1)==1 and self.phase=='train':
             img=img[:,::-1]#水平翻转
             gt_dmap=gt_dmap[:,::-1]#水平翻转
         

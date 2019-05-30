@@ -36,9 +36,9 @@ if __name__=="__main__":
                               momentum=momentum,
                               weight_decay=0)
 #    optimizer=torch.optim.Adam(model.parameters(),lr)
-    train_dataset=CrowdDataset(train_image_root,train_dmap_root,gt_downsample=8)
+    train_dataset=CrowdDataset(train_image_root,train_dmap_root,gt_downsample=8,phase='train')
     train_loader=torch.utils.data.DataLoader(train_dataset,batch_size=1,shuffle=True)
-    test_dataset=CrowdDataset(test_image_root,test_dmap_root,gt_downsample=8)
+    test_dataset=CrowdDataset(test_image_root,test_dmap_root,gt_downsample=8,phase='test')
     test_loader=torch.utils.data.DataLoader(test_dataset,batch_size=1,shuffle=False)
     
     if not os.path.exists('./checkpoints'):
